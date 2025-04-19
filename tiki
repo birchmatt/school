@@ -1,0 +1,150 @@
+#include <SoftwareSerial.h>
+#include <DFRobotDFPlayerMini.h>
+#include <FastLED.h>
+#include <Wifi.h>
+
+
+
+// Pin Definitions
+const int masksPin = 2; // Digital pin for masks event
+const int leotaPin = 3; // Digital pin for leota event
+const int thunderstormPin = 4; // Digital pin for thunderstorm event
+const int tikiRoomPin = 5; // Digital pin for tiki room event
+const char* ssid = "YOUR_SSID";
+const char* password = "YOUR_PASSWORD";
+
+// Event Counters
+int masksCount = 0;
+int leotaCount = 0;
+int thunderstormCount = 0;
+int tikiRoomCount = 0;
+
+// Variables to store the state of the pins
+int masksState = 0;
+int leotaState = 0;
+int thunderstormState = 0;
+int tikiRoomState = 0;
+
+// Variables to store the last state of the pins
+int lastMasksState = LOW;
+int lastLeotaState = LOW;
+int lastThunderstormState = LOW;
+int lastTikiRoomState = LOW;
+
+// Debounce time in milliseconds
+const unsigned long debounceDelay = 50;
+
+// Timers for debouncing
+unsigned long lastDebounceTimeMasks = 0;
+unsigned long lastDebounceTimeLeota = 0;
+unsigned long lastDebounceTimeThunderstorm = 0;
+unsigned long lastDebounceTimeTikiRoom = 0;
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+   while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+      }
+      Serial.println("Connected to WiFi");
+      Serial.print("IP address: ");
+      Serial.println(WiFi.localIP());
+    
+
+  // Set pin modes
+  pinMode(masksPin, INPUT);
+  pinMode(leotaPin, INPUT);
+  pinMode(thunderstormPin, INPUT);
+  pinMode(tikiRoomPin, INPUT);
+
+  // Print initial counts
+  Serial.println("Event Counter Initialized");
+  printCounts();
+}
+
+void loop() {
+  // Read the current state of each pin
+  int currentMasksState = digitalRead(masksPin);
+  int currentLeotaState = digitalRead(leotaPin);
+  int currentThunderstormState = digitalRead(thunderstormPin);
+  int currentTikiRoomState = digitalRead(tikiRoomPin);
+
+  // Check for masks event
+  if (currentMasksState != lastMasksState) {
+    lastDebounceTimeMasks = millis();
+  }
+  if ((millis() - lastDebounceTimeMasks) > debounceDelay) {
+    if (currentMasksState != masksState) {
+      masksState = currentMasksState;
+      if (masksState == HIGH) {
+        masksCount++;
+        Serial.println("Masks event detected!");
+        printCounts();
+      }
+    }
+  }
+  lastMasksState = currentMasksState;
+
+  // Check for leota event
+  if (currentLeotaState != lastLeotaState) {
+    lastDebounceTimeLeota = millis();
+  }
+  if ((millis() - lastDebounceTimeLeota) > debounceDelay) {
+    if (currentLeotaState != leotaState) {
+      leotaState = currentLeotaState;
+      if (leotaState == HIGH) {
+        leotaCount++;
+        Serial.println("Leota event detected!");
+        printCounts();
+      }
+    }
+  }
+  lastLeotaState = currentLeotaState;
+
+  // Check for thunderstorm event
+  if (currentThunderstormState != lastThunderstormState) {
+    lastDebounceTimeThunderstorm = millis();
+  }
+  if ((millis() - lastDebounceTimeThunderstorm) > debounceDelay) {
+    if (currentThunderstormState != thunderstormState) {
+      thunderstormState = currentThunderstormState;
+      if (thunderstormState == HIGH) {
+        thunderstormCount++;
+        Serial.println("Thunderstorm event detected!");
+        printCounts();
+      }
+    }
+  }
+  lastThunderstormState = currentThunderstormState;
+
+  // Check for tiki room event
+  if (currentTikiRoomState != lastTikiRoomState) {
+    lastDebounceTimeTikiRoom = millis();
+  }
+  if ((millis() - lastDebounceTimeTikiRoom) > debounceDelay) {
+    if (currentTikiRoomState != tikiRoomState) {
+      tikiRoomState = currentTikiRoomState;
+      if (tikiRoomState == HIGH) {
+        tikiRoomCount++;
+        Serial.println("Tiki Room event detected!");
+        printCounts();
+      }
+    }
+  }
+  lastTikiRoomState = currentTikiRoomState;
+}
+
+// Function to print the current counts
+void printCounts() {
+  Serial.println("Current Counts:");
+  Serial.print("Masks: ");
+  Serial.println(masksCount);
+  Serial.print("Leota: ");
+  Serial.println(leotaCount);
+  Serial.print("Thunderstorm: ");
+  Serial.println(thunderstormCount);
+  Serial.print("Tiki Room: ");
+  Serial.println(tikiRoomCount);
+  Serial.println();
+}
